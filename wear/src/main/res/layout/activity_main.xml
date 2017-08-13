@@ -9,81 +9,76 @@
     tools:context="cy.ac.unic.pitchlium.MainActivity"
     tools:deviceIds="wear">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:baselineAligned="false"
         android:gravity="center">
-
 
         <TextView
             android:id="@+id/accelerometer"
-            android:layout_width="100dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:text="@string/accelerometer"
+            android:textAlignment="center"
             android:textColor="@color/white"
             app:layout_box="all" />
 
         <TextView
             android:id="@+id/gravity"
-            android:layout_width="100dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/accelerometer"
-            android:layout_centerHorizontal="true"
             android:text="@string/gravity"
+            android:textAlignment="center"
             android:textColor="@color/white"
             app:layout_box="all" />
 
         <TextView
             android:id="@+id/rotation"
-            android:layout_width="100dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/gravity"
-            android:layout_centerHorizontal="true"
             android:text="@string/rotation"
+            android:textAlignment="center"
             android:textColor="@color/white"
             app:layout_box="all" />
 
         <TextView
             android:id="@+id/gyro"
-            android:layout_width="100dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/rotation"
-            android:layout_centerHorizontal="true"
             android:text="@string/gyro"
+            android:textAlignment="center"
             android:textColor="@color/white"
             app:layout_box="all" />
 
         <TextView
             android:id="@+id/heart"
-            android:layout_width="100dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/gyro"
-            android:layout_centerHorizontal="true"
             android:text="@string/heart"
+            android:textAlignment="center"
             android:textColor="@color/white"
             app:layout_box="all" />
 
         <TextView
             android:id="@+id/step"
-            android:layout_width="100dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/heart"
-            android:layout_centerHorizontal="true"
             android:text="@string/step"
+            android:textAlignment="center"
             android:textColor="@color/white"
             app:layout_box="all" />
 
         <TextView
-            android:id="@+id/significant"
-            android:layout_width="100dp"
+            android:id="@+id/presenting"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/step"
-            android:layout_centerHorizontal="true"
-            android:text="@string/significant"
+            android:text="@string/presenting"
+            android:textAlignment="center"
             android:textColor="@color/white"
             app:layout_box="all" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </android.support.wearable.view.BoxInsetLayout>

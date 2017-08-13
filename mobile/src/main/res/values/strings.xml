@@ -1,4 +1,14 @@
 <resources>
     <string name="app_name">Pitchlium</string>
     <string name="hello">Sensor Data</string>
+    <string name="accelerometer">Accelerometer</string>
+    <string name="gyro">Gyroscope</string>
+    <string name="gravity">Gravity</string>
+    <string name="rotation">Rotation Vector</string>
+    <string name="heart">Heart Rate</string>
+    <string name="step">Step Counter</string>
+    <string name="significant">Significant Motion</string>
+    <string name="no_data">No Data</string>
+    <string name="present">Start Presenting</string>
+    <string name="status">Idle</string>
 </resources>

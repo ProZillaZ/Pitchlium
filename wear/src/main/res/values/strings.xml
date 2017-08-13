@@ -7,5 +7,5 @@
     <string name="gyro">Gyroscope</string>
     <string name="heart">Heart Rate</string>
     <string name="step">Step Counter</string>
-    <string name="significant">Significant Motion</string>
+    <string name="presenting">Ready to Present</string>
 </resources>

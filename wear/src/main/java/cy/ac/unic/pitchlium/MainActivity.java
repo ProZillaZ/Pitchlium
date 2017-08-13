@@ -1,10 +1,14 @@
 package cy.ac.unic.pitchlium;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.WindowManager;
@@ -13,8 +17,12 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
@@ -22,11 +30,14 @@ import com.google.android.gms.wearable.Wearable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 // Activity Start
 public class MainActivity extends WearableActivity implements SensorEventListener,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        DataApi.DataListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     // Initialize Data
     private SensorManager mSensorManager;
@@ -34,9 +45,11 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     private boolean nodeConnected = false;
     private long lastSampleTime = 0L;
     private long session = 0L;
+    private String status = "idle";
 
     // Set Data Paths for the Sensors
-    final private String[] PATHS = {"/heart-rate"};
+    final private String PATH = "/sensors";
+    final private String STATUS = "/status";
 
     // Sensor Data Global Variable
     private float[] acceleration = new float[3];
@@ -45,7 +58,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     private float[] rotVector = new float[3];
     private float heartRate = 0;
     private float stepCount = 0;
-    private float significant = 0;
 
     // Initial Global Sensors
     Sensor accelerometerS;
@@ -54,7 +66,10 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     Sensor gyroscopeS;
     Sensor heartrateS;
     Sensor stepCounterS;
-    Sensor significantS;
+
+    private SpeechRecognizer sr = null;
+    private Intent speechIntent = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +80,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         setAmbientEnabled();
 
         // Initialize Sensor Manager
-        SensorManager mSensorManager = ((SensorManager)getSystemService(SENSOR_SERVICE));
+        SensorManager mSensorManager = ((SensorManager) getSystemService(SENSOR_SERVICE));
 
         // Setting Up Separate Sensors
         accelerometerS = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
@@ -74,7 +89,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         gyroscopeS = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         heartrateS = mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
         stepCounterS = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        significantS = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
 
         // Setting the TexViews to Show Data
         TextView accelText = findViewById(R.id.accelerometer);
@@ -83,7 +97,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         TextView gyroscopeText = findViewById(R.id.gyro);
         TextView heartrateText = findViewById(R.id.heart);
         TextView stepCounterText = findViewById(R.id.step);
-        TextView significantText = findViewById(R.id.significant);
 
         // Check If All Sensors are Compatible
         if (accelerometerS != null) {
@@ -110,10 +123,12 @@ public class MainActivity extends WearableActivity implements SensorEventListene
             stepCounterText.setTextColor(this.getResources().getColor(R.color.green));
             mSensorManager.registerListener(this, stepCounterS, SensorManager.SENSOR_DELAY_NORMAL);
         }
-        if (significantS != null) {
-            significantText.setTextColor(this.getResources().getColor(R.color.green));
-            mSensorManager.registerListener(this, significantS, SensorManager.SENSOR_DELAY_NORMAL);
-        }
+
+        speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        sr = SpeechRecognizer.createSpeechRecognizer(this);
+        sr.setRecognitionListener(recognitionListener);
 
         // Initialize Data Layer API
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -124,6 +139,34 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         mGoogleApiClient.connect();
 
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onDataChanged(DataEventBuffer dataEvents) {
+        for (DataEvent event : dataEvents) {
+            if (event.getType() == DataEvent.TYPE_CHANGED) {
+                // DataItem changed
+                DataItem item = event.getDataItem();
+                if (item.getUri().getPath().compareTo(STATUS) == 0) {
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    status = dataMap.getString("Status");
+                    if (status.equals("presenting")) startPresenting(); else stopPresenting();
+                }
+            } else if (event.getType() == DataEvent.TYPE_DELETED) {
+                status = "idle";
+            }
+        }
+    }
+
+    public void startPresenting() {
+        sr.startListening(speechIntent);
+        TextView presentingText = findViewById(R.id.presenting);
+        presentingText.setText("Presenting...");
+    }
+    public void stopPresenting() {
+        sr.stopListening();
+        TextView presentingText = findViewById(R.id.presenting);
+        presentingText.setText("Analyzing...");
     }
 
     @Override
@@ -159,11 +202,8 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         if (sensorEvent.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
             stepCount = sensorEvent.values[0];
         }
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_SIGNIFICANT_MOTION) {
-            significant = sensorEvent.values[0];
-        }
 
-        if (lastSampleTime == 0L || lastSampleTime + 300 < System.currentTimeMillis()) {
+        if (lastSampleTime == 0L || lastSampleTime + 50 < System.currentTimeMillis()) {
             final JSONObject data = new JSONObject();
             try {
                 data.put("x", acceleration[0]);
@@ -172,15 +212,14 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                 data.put("g1", gyroscope[0]);
                 data.put("g2", gyroscope[1]);
                 data.put("g3", gyroscope[2]);
-                data.put("heartrate",heartRate);
-                data.put("grav1", gravity[0]);
-                data.put("grav2", gravity[1]);
-                data.put("grav3", gravity[2]);
+                data.put("heartrate", heartRate);
+                data.put("gr1", gravity[0]);
+                data.put("gr2", gravity[1]);
+                data.put("gr3", gravity[2]);
                 data.put("r1", rotVector[0]);
                 data.put("r2", rotVector[1]);
                 data.put("r3", rotVector[2]);
                 data.put("steps", stepCount);
-                data.put("significant", significant);
                 data.put("accRange", accelerometerS.getMaximumRange());
                 data.put("watchtime", System.currentTimeMillis());
                 data.put("sessionStartTime", session);
@@ -192,6 +231,43 @@ public class MainActivity extends WearableActivity implements SensorEventListene
             }
         }
     }
+
+    public RecognitionListener recognitionListener = new RecognitionListener() {
+        @Override
+        public void onReadyForSpeech(Bundle bundle) {
+        }
+        @Override
+        public void onBeginningOfSpeech() {
+        }
+        @Override
+        public void onRmsChanged(float v) {
+        }
+        @Override
+        public void onBufferReceived(byte[] bytes) {
+        }
+        @Override
+        public void onEndOfSpeech() {
+        }
+        @Override
+        public void onError(int i) {
+        }
+        @Override
+        public void onResults(Bundle results) {
+            ArrayList data = results.getStringArrayList(SpeechRecognizer.
+                    RESULTS_RECOGNITION);
+            for (int i = 0; i < data.size(); i++) {
+                TextView speechText = findViewById(R.id.presenting);
+                speechText.setText("" + data.get(i));
+            }
+        }
+        @Override
+        public void onPartialResults(Bundle bundle) {
+        }
+
+        @Override
+        public void onEvent(int i, Bundle bundle) {
+        }
+    };
 
     // Send Sensor Data From Wearable to Phone
     private void sendData(final String data) {
@@ -208,11 +284,10 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                     Log.e("WEAR APP", "Failed to connect to mGoogleApiClient within " + 15000 + " seconds");
                     return;
                 }
-
                 // If Everything is Connected
                 if (mGoogleApiClient.isConnected()) {
                     // Set Data Transfer Path
-                    PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/heart-rate");
+                    PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(PATH);
                     // Map Sensor Data
                     putDataMapRequest.getDataMap().putString("SensorData", data);
                     // Request Data Transfer
@@ -220,13 +295,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                     // Send Data
                     PendingResult<DataApi.DataItemResult> pendingResult =
                             Wearable.DataApi.putDataItem(mGoogleApiClient, request);
-                    // Callback
-                    pendingResult.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-                        @Override
-                        public void onResult(DataApi.DataItemResult dataItemResult) {
-                            Log.e("WEAR APP", "APPLICATION Result has come");
-                        }
-                    });
 
                 } else {
                     Log.e("WEAR APP", "No Google API Client connection");
@@ -236,11 +304,11 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
 
     @Override
     protected void onDestroy() {
-        mSensorManager.unregisterListener(this);
         super.onDestroy();
     }
 
@@ -261,6 +329,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
 
     @Override
     public void onConnected(Bundle bundle) {
+        Wearable.DataApi.addListener(mGoogleApiClient, this);
         nodeConnected = true;
     }
 
@@ -272,5 +341,33 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         nodeConnected = false;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onPause() {
+        Wearable.DataApi.removeListener(mGoogleApiClient, this);
+        mGoogleApiClient.disconnect();
+        super.onPause();
     }
 }

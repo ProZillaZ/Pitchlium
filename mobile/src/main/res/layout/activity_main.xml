@@ -6,14 +6,229 @@
     android:layout_height="match_parent"
     tools:context="cy.ac.unic.pitchlium.MainActivity">
 
-    <TextView
-        android:id="@+id/hello"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:layout_width="344dp"
+        android:layout_height="495dp"
+        android:orientation="vertical">
+
+        <!-- Accelerometer -->
+        <TextView
+            android:id="@+id/accelerometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/accelerometer"
+            android:textAlignment="viewStart"
+            android:textStyle="bold"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="16dp" />
+
+        <TextView
+            android:id="@+id/x"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="33dp" />
+
+        <TextView
+            android:id="@+id/y"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="50dp" />
+
+        <TextView
+            android:id="@+id/z"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="67dp" />
+
+        <!-- Gyroscope -->
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="10dp" />
+
+        <TextView
+            android:id="@+id/gyro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/gyro"
+            android:textAlignment="viewStart"
+            android:textStyle="bold"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="98dp" />
+
+        <TextView
+            android:id="@+id/g1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="115dp" />
+
+        <TextView
+            android:id="@+id/g2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="132dp" />
+
+        <TextView
+            android:id="@+id/g3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="149dp" />
+
+        <!-- Gravity -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <TextView
+            android:id="@+id/gravity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/gravity"
+            android:textAlignment="viewStart"
+            android:textStyle="bold"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="181dp" />
+
+        <TextView
+            android:id="@+id/gr1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="198dp" />
+        <TextView
+            android:id="@+id/gr2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="230dp" />
+
+        <TextView
+            android:id="@+id/gr3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="215dp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <!-- Rotation Vector -->
+        <TextView
+            android:id="@+id/rotation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/rotation"
+            android:textAlignment="viewStart"
+            android:textStyle="bold"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="181dp" />
+
+        <TextView
+            android:id="@+id/r1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="230dp" />
+
+        <TextView
+            android:id="@+id/r2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="198dp" />
+
+        <TextView
+            android:id="@+id/r3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="215dp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <!-- Heart Rate -->
+        <TextView
+            android:id="@+id/h"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/heart"
+            android:textAlignment="viewStart"
+            android:textStyle="bold"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="181dp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <!-- Step Counter -->
+        <TextView
+            android:id="@+id/s"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/step"
+            android:textAlignment="viewStart"
+            android:textStyle="bold"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="181dp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <!-- Significant Motion -->
+
+        <TextView
+            android:id="@+id/sig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/significant"
+            android:textAlignment="viewStart"
+            android:textStyle="bold"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="181dp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <Button
+            android:id="@+id/present"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/present" />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/status"
+            android:textAlignment="viewStart"
+            android:textStyle="bold"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="181dp" />
+
+    </LinearLayout>
+
 
 </android.support.constraint.ConstraintLayout>
