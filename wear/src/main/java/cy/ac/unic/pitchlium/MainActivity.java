@@ -7,13 +7,29 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
+import android.util.Log;
 import android.widget.TextView;
 
-public class MainActivity extends WearableActivity implements SensorEventListener {
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
+
+import java.util.concurrent.TimeUnit;
+
+public class MainActivity extends WearableActivity implements SensorEventListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private BoxInsetLayout mContainerView;
-
     private SensorManager mSensorManager;
+    private GoogleApiClient mGoogleApiClient;
+    private boolean nodeConnected = false;
+
+    final private String[] PATHS = {"/heart-beat"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,16 +68,55 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         if (heartrate != null) {
             heartrateText.setTextColor(this.getResources().getColor(R.color.green));
         }
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+    private void sendData(final String dataToSend, final int sensor) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (!nodeConnected) {
+                    mGoogleApiClient.blockingConnect(15000, TimeUnit.SECONDS);
+                }
+                if (!nodeConnected) {
+                    Log.e("WEAR APP", "Failed to connect to mGoogleApiClient within " + 15000 + " seconds");
+                    return;
+                }
+
+                if (mGoogleApiClient.isConnected()) {
+                    PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(PATHS[sensor]);
+                    putDataMapRequest.getDataMap().putString("data", dataToSend);
+                    PutDataRequest request = putDataMapRequest.asPutDataRequest();
+
+                    PendingResult<DataApi.DataItemResult> pendingResult =
+                            Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+
+                    pendingResult.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                        @Override
+                        public void onResult(DataApi.DataItemResult dataItemResult) {
+                            Log.e("WEAR APP", "APPLICATION Result has come");
+                        }
+                    });
+
+                } else {
+                    Log.e("WEAR APP", "No Google API Client connection");
+                }
+            }
+        }).start();
     }
 
     @Override
     public void onSensorChanged(final SensorEvent sensorEvent) {
-
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
     }
 
     @Override
@@ -77,5 +132,20 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     @Override
     public void onExitAmbient() {
         super.onExitAmbient();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        nodeConnected = true;
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        nodeConnected = false;
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        nodeConnected = false;
     }
 }
