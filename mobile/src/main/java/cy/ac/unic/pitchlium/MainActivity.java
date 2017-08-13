@@ -35,6 +35,7 @@ public class MainActivity extends Activity implements
     private boolean nodeConnected = false;
     final private String PATH = "/sensors";
     final private String STATUS = "/status";
+    final private String SCRIPT = "/script";
     private String status = "idle";
 
     float x; TextView tx;
@@ -138,7 +139,6 @@ public class MainActivity extends Activity implements
                         r2 = (float) data.getDouble("r2");
                         r3 = (float) data.getDouble("r3");
                         steps = (float) data.getDouble("steps");
-                        significant = (float) data.getDouble("significant");
                         accRange = (float) data.getDouble("accRange");
                         watchtime = (float) data.getDouble("watchtime");
                         sessionStartTime = (float) data.getDouble("sessionStartTime");
@@ -161,6 +161,10 @@ public class MainActivity extends Activity implements
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                }
+                else if (item.getUri().getPath().compareTo(SCRIPT) == 0) {
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    Log.e("Script: ", dataMap.getString("Script"));
                 }
             }
         }

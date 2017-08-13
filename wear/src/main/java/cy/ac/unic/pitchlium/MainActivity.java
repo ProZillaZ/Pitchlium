@@ -40,7 +40,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         GoogleApiClient.OnConnectionFailedListener {
 
     // Initialize Data
-    private SensorManager mSensorManager;
     private GoogleApiClient mGoogleApiClient;
     private boolean nodeConnected = false;
     private long lastSampleTime = 0L;
@@ -50,6 +49,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     // Set Data Paths for the Sensors
     final private String PATH = "/sensors";
     final private String STATUS = "/status";
+    final private String SCRIPT = "/script";
 
     // Sensor Data Global Variable
     private float[] acceleration = new float[3];
@@ -69,6 +69,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
 
     private SpeechRecognizer sr = null;
     private Intent speechIntent = null;
+    StringBuilder script = new StringBuilder();
 
 
     @Override
@@ -159,14 +160,49 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     }
 
     public void startPresenting() {
+        script = new StringBuilder();
         sr.startListening(speechIntent);
         TextView presentingText = findViewById(R.id.presenting);
         presentingText.setText("Presenting...");
     }
     public void stopPresenting() {
         sr.stopListening();
+        sendScript();
         TextView presentingText = findViewById(R.id.presenting);
         presentingText.setText("Analyzing...");
+    }
+    public void sendScript() {
+        // Start a New Runnable
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Check Node Connection
+                if (!nodeConnected) {
+                    mGoogleApiClient.blockingConnect(15000, TimeUnit.SECONDS);
+                }
+                // If Node not Connected
+                if (!nodeConnected) {
+                    Log.e("WEAR APP", "Failed to connect to mGoogleApiClient within " + 15000 + " seconds");
+                    return;
+                }
+                // If Everything is Connected
+                if (mGoogleApiClient.isConnected()) {
+                    // Set Data Transfer Path
+                    PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(SCRIPT);
+                    // Map Sensor Data
+                    Log.e("Wear Script: ", script.toString());
+                    putDataMapRequest.getDataMap().putString("Script", script.toString());
+                    // Request Data Transfer
+                    PutDataRequest request = putDataMapRequest.asPutDataRequest();
+                    // Send Data
+                    PendingResult<DataApi.DataItemResult> pendingResult =
+                            Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+
+                } else {
+                    Log.e("WEAR APP", "No Google API Client connection");
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -224,7 +260,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                 data.put("watchtime", System.currentTimeMillis());
                 data.put("sessionStartTime", session);
                 lastSampleTime = System.currentTimeMillis();
-
                 sendData(data.toString());
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -253,12 +288,9 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         }
         @Override
         public void onResults(Bundle results) {
-            ArrayList data = results.getStringArrayList(SpeechRecognizer.
-                    RESULTS_RECOGNITION);
-            for (int i = 0; i < data.size(); i++) {
-                TextView speechText = findViewById(R.id.presenting);
-                speechText.setText("" + data.get(i));
-            }
+            ArrayList data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            script.append(data.get(0));
+            sr.startListening(speechIntent);
         }
         @Override
         public void onPartialResults(Bundle bundle) {
