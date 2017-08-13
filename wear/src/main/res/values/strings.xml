@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Pitchlium</string>
+    <string name="hello_world">Hello World!</string>
+    <string name="accelerometer">Accelerometer</string>
+    <string name="gravity">Gravity</string>
+    <string name="rotation">Rotation Vector</string>
+    <string name="gyro">Gyroscope</string>
+    <string name="heart">Heart Rate</string>
+</resources>
