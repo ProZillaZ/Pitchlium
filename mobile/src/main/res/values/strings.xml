@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Pitchlium</string>
+    <string name="hello">Sensor Data</string>
 </resources>

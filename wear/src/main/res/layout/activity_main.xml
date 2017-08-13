@@ -64,6 +64,26 @@
             android:textColor="@color/white"
             app:layout_box="all" />
 
+        <TextView
+            android:id="@+id/step"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/heart"
+            android:layout_centerHorizontal="true"
+            android:text="@string/step"
+            android:textColor="@color/white"
+            app:layout_box="all" />
+
+        <TextView
+            android:id="@+id/significant"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/step"
+            android:layout_centerHorizontal="true"
+            android:text="@string/significant"
+            android:textColor="@color/white"
+            app:layout_box="all" />
+
     </RelativeLayout>
 
 </android.support.wearable.view.BoxInsetLayout>

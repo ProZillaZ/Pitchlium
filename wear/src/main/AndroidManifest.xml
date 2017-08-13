@@ -3,6 +3,9 @@
     package="cy.ac.unic.pitchlium">
 
     <uses-feature android:name="android.hardware.type.watch" />
+    <uses-feature android:name="android.hardware.sensor.accelerometer" />
+    <uses-feature android:name="android.hardware.sensor.gyroscope" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -22,8 +25,10 @@
             android:theme="@android:style/Theme.DeviceDefault.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/heart-rate" />
             </intent-filter>
         </activity>
     </application>
