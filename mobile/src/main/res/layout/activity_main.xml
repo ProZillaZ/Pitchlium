@@ -1,234 +1,447 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="cy.ac.unic.pitchlium.MainActivity">
 
-    <LinearLayout
-        android:layout_width="344dp"
-        android:layout_height="495dp"
-        android:orientation="vertical">
+    <FrameLayout
+        android:id="@+id/content_presentation"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:visibility="visible">
 
-        <!-- Accelerometer -->
-        <TextView
-            android:id="@+id/accelerometer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/accelerometer"
-            android:textAlignment="viewStart"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="16dp" />
-
-        <TextView
-            android:id="@+id/x"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="33dp" />
-
-        <TextView
-            android:id="@+id/y"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="50dp" />
-
-        <TextView
-            android:id="@+id/z"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="67dp" />
-
-        <!-- Gyroscope -->
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="10dp" />
-
-        <TextView
-            android:id="@+id/gyro"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/gyro"
-            android:textAlignment="viewStart"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="98dp" />
-
-        <TextView
-            android:id="@+id/g1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="115dp" />
-
-        <TextView
-            android:id="@+id/g2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="132dp" />
-
-        <TextView
-            android:id="@+id/g3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="149dp" />
-
-        <!-- Gravity -->
-        <Space
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
 
-        <TextView
-            android:id="@+id/gravity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/gravity"
-            android:textAlignment="viewStart"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="181dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="152dp"
+                android:orientation="horizontal"
+                android:gravity="center">
 
-        <TextView
-            android:id="@+id/gr1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="198dp" />
-        <TextView
-            android:id="@+id/gr2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="230dp" />
+                <TextView
+                    android:id="@+id/hour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/zeros"
+                    android:textAllCaps="true"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/gr3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="215dp" />
+                <TextView
+                    android:id="@+id/dotdot1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dotdot"
+                    android:textAllCaps="true"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
 
-        <Space
+                <TextView
+                    android:id="@+id/minute"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/zeros"
+                    android:textAllCaps="true"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/dotdot2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dotdot"
+                    android:textAllCaps="true"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/second"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/zeros"
+                    android:textAllCaps="true"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/present"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/present" />
+
+        </LinearLayout>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/content_data"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:visibility="gone">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
-        <!-- Rotation Vector -->
-        <TextView
-            android:id="@+id/rotation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/rotation"
-            android:textAlignment="viewStart"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="181dp" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/r1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="230dp" />
+                <!-- Accelerometer -->
 
-        <TextView
-            android:id="@+id/r2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="198dp" />
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/wear"
+                    android:textAllCaps="true"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/r3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="215dp" />
+                <View
+                    style="@style/Divider"
+                    android:layout_height="2dp" />
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
 
-        <!-- Heart Rate -->
-        <TextView
-            android:id="@+id/h"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/heart"
-            android:textAlignment="viewStart"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="181dp" />
+                <TextView
+                    android:id="@+id/accelerometer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/accelerometer"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="16dp" />
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+                <TextView
+                    android:id="@+id/x"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="33dp" />
 
-        <!-- Step Counter -->
-        <TextView
-            android:id="@+id/s"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/step"
-            android:textAlignment="viewStart"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="181dp" />
+                <TextView
+                    android:id="@+id/y"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="50dp" />
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+                <TextView
+                    android:id="@+id/z"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="67dp" />
 
-        <!-- Significant Motion -->
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="10dp" />
 
-        <TextView
-            android:id="@+id/sig"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/significant"
-            android:textAlignment="viewStart"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="181dp" />
+                <!-- Gyroscope -->
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+                <!-- Gravity -->
 
-        <Button
-            android:id="@+id/present"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/present" />
+                <TextView
+                    android:id="@+id/gravity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gravity"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
 
-        <TextView
-            android:id="@+id/status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/status"
-            android:textAlignment="viewStart"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="181dp" />
+                <TextView
+                    android:id="@+id/gr1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="198dp" />
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/gr2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="230dp" />
+
+                <TextView
+                    android:id="@+id/gr3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="215dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Heart Rate -->
+                <TextView
+                    android:id="@+id/heart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/heart"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/h"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:textAlignment="viewStart"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Light -->
+                <TextView
+                    android:id="@+id/light"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/light"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/l"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:textAlignment="viewStart"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Step Counter -->
+                <TextView
+                    android:id="@+id/step"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/step"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/s"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:textAlignment="viewStart"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
 
 
-</android.support.constraint.ConstraintLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:orientation="vertical">
+
+                <!-- Accelerometer -->
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mobile"
+                    android:textAllCaps="true"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:id="@+id/view2"
+                    style="@style/Divider"
+                    android:layout_width="wrap_content"
+                    android:layout_height="2dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <TextView
+                    android:id="@+id/maccelerometer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/accelerometer"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="16dp" />
+
+                <TextView
+                    android:id="@+id/mx"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="33dp" />
+
+                <TextView
+                    android:id="@+id/my"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="50dp" />
+
+                <TextView
+                    android:id="@+id/mz"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="67dp" />
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="10dp" />
+
+                <!-- Step Counter -->
+                <TextView
+                    android:id="@+id/mstep"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/step"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/ms"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:textAlignment="viewStart"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Temperature -->
+                <TextView
+                    android:id="@+id/temp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/temp"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/t"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:textAlignment="viewStart"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Humidity -->
+                <TextView
+                    android:id="@+id/humidity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/humidity"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/hu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:textAlignment="viewStart"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Pressure -->
+                <TextView
+                    android:id="@+id/pressure"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pressure"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/p"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:textAlignment="viewStart"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="?android:attr/windowBackground"
+        app:menu="@menu/navigation" />
+</LinearLayout>

@@ -51,22 +51,18 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     final private String SCRIPT = "/script";
 
     // Sensor Data Global Variable
-    private float[] acceleration = new float[3];
-    private float[] gyroscope = new float[3];
-    private float[] gravity = new float[3];
-    private float[] rotVector = new float[3];
-    private float heartRate = 0;
-    private float stepCount = 0;
-    private float light = 0;
+    float[] acceleration = new float[3], gravity = new float[3];
+    float heartRate = 0, stepCount = 0, light = 0;
+    long tStart = 0;
 
     // Initial Global Sensors
     Sensor accelerometerS;
     Sensor gravityS;
-    Sensor rotVectorS;
-    Sensor gyroscopeS;
     Sensor heartrateS;
     Sensor stepCounterS;
     Sensor lightS;
+
+    TextView hours, minutes, seconds, tStatus;
 
     private SpeechRecognizer sr = null;
     private Intent speechIntent = null;
@@ -83,46 +79,29 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         // Initialize Sensor Manager
         SensorManager mSensorManager = ((SensorManager) getSystemService(SENSOR_SERVICE));
 
+        hours = (TextView) findViewById(R.id.hour);
+        minutes = (TextView) findViewById(R.id.minute);
+        seconds = (TextView) findViewById(R.id.second);
+        tStatus = (TextView) findViewById(R.id.status);
+
         // Setting Up Separate Sensors
         accelerometerS = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         gravityS = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
-        rotVectorS = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
-        gyroscopeS = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         heartrateS = mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
         stepCounterS = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         lightS = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
-        // Setting the TexViews to Show Data
-        TextView accelText = findViewById(R.id.accelerometer);
-        TextView gravityText = findViewById(R.id.gravity);
-        TextView rotVectorText = findViewById(R.id.rotation);
-        TextView gyroscopeText = findViewById(R.id.gyro);
-        TextView heartrateText = findViewById(R.id.heart);
-        TextView stepCounterText = findViewById(R.id.step);
-
         // Check If All Sensors are Compatible
         if (accelerometerS != null) {
-            accelText.setTextColor(this.getResources().getColor(R.color.green));
             mSensorManager.registerListener(this, accelerometerS, SensorManager.SENSOR_DELAY_NORMAL);
         }
         if (gravityS != null) {
-            gravityText.setTextColor(this.getResources().getColor(R.color.green));
             mSensorManager.registerListener(this, gravityS, SensorManager.SENSOR_DELAY_NORMAL);
         }
-        if (rotVectorS != null) {
-            rotVectorText.setTextColor(this.getResources().getColor(R.color.green));
-            mSensorManager.registerListener(this, rotVectorS, SensorManager.SENSOR_DELAY_NORMAL);
-        }
-        if (gyroscopeS != null) {
-            gyroscopeText.setTextColor(this.getResources().getColor(R.color.green));
-            mSensorManager.registerListener(this, gyroscopeS, SensorManager.SENSOR_DELAY_NORMAL);
-        }
         if (heartrateS != null) {
-            heartrateText.setTextColor(this.getResources().getColor(R.color.green));
             mSensorManager.registerListener(this, heartrateS, SensorManager.SENSOR_DELAY_NORMAL);
         }
         if (stepCounterS != null) {
-            stepCounterText.setTextColor(this.getResources().getColor(R.color.green));
             mSensorManager.registerListener(this, stepCounterS, SensorManager.SENSOR_DELAY_NORMAL);
         }
         if (lightS != null) {
@@ -164,16 +143,15 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     }
 
     public void startPresenting() {
+        tStart = System.currentTimeMillis();
         script = new StringBuilder();
         sr.startListening(speechIntent);
-        TextView presentingText = findViewById(R.id.presenting);
-        presentingText.setText("Presenting...");
+        tStatus.setText("Presenting...");
     }
     public void stopPresenting() {
         sr.stopListening();
         sendScript();
-        TextView presentingText = findViewById(R.id.presenting);
-        presentingText.setText("Analyzing...");
+        tStatus.setText("Analyzing...");
     }
     public void sendScript() {
         // Start a New Runnable
@@ -212,6 +190,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     @Override
     public void onSensorChanged(final SensorEvent sensorEvent) {
         if (status.equals("presenting")) {
+            measureTimer();
             if (lastSampleTime == 0L) {
                 lastSampleTime = System.currentTimeMillis();
             }
@@ -224,21 +203,10 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                 heartRate = sensorEvent.values[0];
             }
 
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                gyroscope[0] = sensorEvent.values[0];
-                gyroscope[1] = sensorEvent.values[1];
-                gyroscope[2] = sensorEvent.values[2];
-            }
-
             if (sensorEvent.sensor.getType() == Sensor.TYPE_GRAVITY) {
                 gravity[0] = sensorEvent.values[0];
                 gravity[1] = sensorEvent.values[1];
                 gravity[2] = sensorEvent.values[2];
-            }
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-                rotVector[0] = sensorEvent.values[0];
-                rotVector[1] = sensorEvent.values[1];
-                rotVector[2] = sensorEvent.values[2];
             }
             if (sensorEvent.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
                 stepCount = sensorEvent.values[0];
@@ -253,16 +221,10 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                     data.put("x", acceleration[0]);
                     data.put("y", acceleration[1]);
                     data.put("z", acceleration[2]);
-                    data.put("g1", gyroscope[0]);
-                    data.put("g2", gyroscope[1]);
-                    data.put("g3", gyroscope[2]);
                     data.put("heartrate", heartRate);
                     data.put("gr1", gravity[0]);
                     data.put("gr2", gravity[1]);
                     data.put("gr3", gravity[2]);
-                    data.put("r1", rotVector[0]);
-                    data.put("r2", rotVector[1]);
-                    data.put("r3", rotVector[2]);
                     data.put("steps", stepCount);
                     data.put("light", light);
                     data.put("accRange", accelerometerS.getMaximumRange());
@@ -274,6 +236,54 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                 }
             }
         }
+    }
+
+    // Send Sensor Data From Wearable to Phone
+    private void sendData(final String data) {
+        // Start a New Runnable
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Check Node Connection
+                if (!nodeConnected) {
+                    mGoogleApiClient.blockingConnect(15000, TimeUnit.SECONDS);
+                }
+                // If Node not Connected
+                if (!nodeConnected) {
+                    Log.e("WEAR APP", "Failed to connect to mGoogleApiClient within " + 15000 + " seconds");
+                    return;
+                }
+                // If Everything is Connected
+                if (mGoogleApiClient.isConnected()) {
+                    // Set Data Transfer Path
+                    PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(PATH);
+                    // Map Sensor Data
+                    putDataMapRequest.getDataMap().putString("SensorData", data);
+                    // Request Data Transfer
+                    PutDataRequest request = putDataMapRequest.asPutDataRequest();
+                    // Send Data
+                    PendingResult<DataApi.DataItemResult> pendingResult =
+                            Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+
+                } else {
+                    Log.e("WEAR APP", "No Google API Client connection");
+                }
+            }
+        }).start();
+    }
+
+    public void measureTimer() {
+        double time = (System.currentTimeMillis() - tStart) / 1000.0;
+        int hour = (int) time / 3600;
+        int remainder = (int) time - hour * 3600;
+        int mins = remainder / 60;
+        remainder = remainder - mins * 60;
+        int secs = remainder;
+        int[] currentTime = {hour, mins, secs};
+
+        hours.setText((currentTime[0] < 10 ? "0" : "") + currentTime[0]);
+        minutes.setText((currentTime[1] < 10 ? "0" : "") + currentTime[1]);
+        seconds.setText((currentTime[2] < 10 ? "0" : "") + currentTime[2]);
     }
 
     public RecognitionListener recognitionListener = new RecognitionListener() {
@@ -309,40 +319,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         public void onEvent(int i, Bundle bundle) {
         }
     };
-
-    // Send Sensor Data From Wearable to Phone
-    private void sendData(final String data) {
-        // Start a New Runnable
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // Check Node Connection
-                if (!nodeConnected) {
-                    mGoogleApiClient.blockingConnect(15000, TimeUnit.SECONDS);
-                }
-                // If Node not Connected
-                if (!nodeConnected) {
-                    Log.e("WEAR APP", "Failed to connect to mGoogleApiClient within " + 15000 + " seconds");
-                    return;
-                }
-                // If Everything is Connected
-                if (mGoogleApiClient.isConnected()) {
-                    // Set Data Transfer Path
-                    PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(PATH);
-                    // Map Sensor Data
-                    putDataMapRequest.getDataMap().putString("SensorData", data);
-                    // Request Data Transfer
-                    PutDataRequest request = putDataMapRequest.asPutDataRequest();
-                    // Send Data
-                    PendingResult<DataApi.DataItemResult> pendingResult =
-                            Wearable.DataApi.putDataItem(mGoogleApiClient, request);
-
-                } else {
-                    Log.e("WEAR APP", "No Google API Client connection");
-                }
-            }
-        }).start();
-    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {

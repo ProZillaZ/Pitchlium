@@ -12,72 +12,83 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:baselineAligned="false"
-        android:gravity="center">
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/accelerometer"
+            android:id="@+id/status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/accelerometer"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            app:layout_box="all" />
-
-        <TextView
-            android:id="@+id/gravity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/gravity"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            app:layout_box="all" />
-
-        <TextView
-            android:id="@+id/rotation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/rotation"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            app:layout_box="all" />
-
-        <TextView
-            android:id="@+id/gyro"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/gyro"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            app:layout_box="all" />
-
-        <TextView
-            android:id="@+id/heart"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/heart"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            app:layout_box="all" />
-
-        <TextView
-            android:id="@+id/step"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/step"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            app:layout_box="all" />
-
-        <TextView
-            android:id="@+id/presenting"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
             android:text="@string/presenting"
             android:textAlignment="center"
-            android:textColor="@color/white"
-            app:layout_box="all" />
+            android:textColor="@color/green"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_weight="0.09">
+
+            <TextView
+                android:id="@+id/hour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/zeros"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/dotdot1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dotdot"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/minute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/zeros"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/dotdot2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dotdot"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/second"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/zeros"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.19" />
 
     </LinearLayout>
 

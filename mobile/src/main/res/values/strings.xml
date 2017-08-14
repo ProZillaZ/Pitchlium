@@ -7,8 +7,17 @@
     <string name="rotation">Rotation Vector</string>
     <string name="heart">Heart Rate</string>
     <string name="step">Step Counter</string>
-    <string name="significant">Significant Motion</string>
+    <string name="light">Room Light</string>
     <string name="no_data">No Data</string>
     <string name="present">Start Presenting</string>
     <string name="status">Idle</string>
+    <string name="tab1">Presentation</string>
+    <string name="tab2">Debug Data</string>
+    <string name="mobile">Handheld Sensors</string>
+    <string name="wear">Wearable Sensors</string>
+    <string name="temp">Room Temperature</string>
+    <string name="humidity">Room Humidity</string>
+    <string name="pressure">Room Pressure</string>
+    <string name="zeros">00</string>
+    <string name="dotdot">:</string>
 </resources>

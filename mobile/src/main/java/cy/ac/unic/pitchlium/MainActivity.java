@@ -1,15 +1,19 @@
 package cy.ac.unic.pitchlium;
 
-import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -39,7 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends Activity implements
+public class MainActivity extends AppCompatActivity implements
         DataApi.DataListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -53,36 +57,20 @@ public class MainActivity extends Activity implements
     final String SCRIPT = "/script";
     String status = "idle";
 
-    float x; TextView tx;
-    float y; TextView ty;
-    float z; TextView tz;
-    float g1; TextView tg1;
-    float g2; TextView tg2;
-    float g3; TextView tg3;
-    float heartrate; TextView theartrate;
-    float gr1; TextView tgr1;
-    float gr2; TextView tgr2;
-    float gr3; TextView tgr3;
-    float r1; TextView tr1;
-    float r2; TextView tr2;
-    float r3; TextView tr3;
-    float steps; TextView tsteps;
-    float accRange;
-    float watchtime;
-    float sessionStartTime;
+    float x, y, z, heartrate, gr1, gr2, gr3, steps, accRange, watchtime, light;
+    TextView tx, tmx, ty, tmy, tz, tmz, theartrate, tgr1, tgr2, tgr3, tsteps, tms, tt, thu, tp, tl,
+             hours, minutes, seconds;
 
     Button startPresentationBtn;
     String recordedScript = "";
 
     SensorManager mSensorManager;
-    float[] acceleration = new float[3]; Sensor mAccelerometer;
-    float stepCount = 0; Sensor mStepCounter;
-    float temperature = 0; Sensor mTemperature;
-    float humidity = 0; Sensor mHumidity;
-    float pressure = 0; Sensor mPressure;
+    Sensor mAccelerometer, mStepCounter, mTemperature, mHumidity, mPressure;
+    float[] acceleration = new float[3];
+    float stepCount = 0, temperature = 0, humidity = 0, pressure = 0;
 
     List<String> wearReadings = new ArrayList<>();
-    List<String> mobileReadings =  new ArrayList<>();
+    List<String> mobileReadings = new ArrayList<>();
 
     long tStart = 0;
     double presentationDuration = 0;
@@ -92,22 +80,53 @@ public class MainActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tx = findViewById(R.id.x);
-        ty = findViewById(R.id.y);
-        tz = findViewById(R.id.z);
-        tg1 = findViewById(R.id.g1);
-        tg2 = findViewById(R.id.g2);
-        tg3 = findViewById(R.id.g3);
-        tgr1 = findViewById(R.id.gr1);
-        tgr2 = findViewById(R.id.gr2);
-        tgr3 = findViewById(R.id.gr3);
-        tr1 = findViewById(R.id.r1);
-        tr2 = findViewById(R.id.r2);
-        tr3 = findViewById(R.id.r3);
-        theartrate = findViewById(R.id.h);
-        tsteps = findViewById(R.id.s);
+        BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+                = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
-        startPresentationBtn = findViewById(R.id.present);
+            FrameLayout presentation = (FrameLayout) findViewById(R.id.content_presentation);
+            FrameLayout data = (FrameLayout) findViewById(R.id.content_data);
+
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.navigation_presentation:
+                        presentation.setVisibility(View.VISIBLE);
+                        data.setVisibility(View.GONE);
+                        return true;
+                    case R.id.navigation_data:
+                        presentation.setVisibility(View.GONE);
+                        data.setVisibility(View.VISIBLE);
+                        return true;
+                }
+                return false;
+            }
+
+        };
+
+        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        tx = (TextView) findViewById(R.id.x);
+        ty = (TextView) findViewById(R.id.y);
+        tz = (TextView) findViewById(R.id.z);
+        tgr1 = (TextView) findViewById(R.id.gr1);
+        tgr2 = (TextView) findViewById(R.id.gr2);
+        tgr3 = (TextView) findViewById(R.id.gr3);
+        theartrate = (TextView) findViewById(R.id.h);
+        tsteps = (TextView) findViewById(R.id.s);
+        tmx = (TextView) findViewById(R.id.mx);
+        tmy = (TextView) findViewById(R.id.my);
+        tmz = (TextView) findViewById(R.id.mz);
+        tms = (TextView) findViewById(R.id.ms);
+        tt = (TextView) findViewById(R.id.t);
+        thu = (TextView) findViewById(R.id.hu);
+        tp = (TextView) findViewById(R.id.p);
+        tl = (TextView) findViewById(R.id.l);
+        hours = (TextView) findViewById(R.id.hour);
+        minutes = (TextView) findViewById(R.id.minute);
+        seconds = (TextView) findViewById(R.id.second);
+
+        startPresentationBtn = (Button) findViewById(R.id.present);
         startPresentationBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startPresentation();
@@ -145,28 +164,37 @@ public class MainActivity extends Activity implements
                 .build();
 
     }
+
     @Override
     public final void onSensorChanged(SensorEvent sensorEvent) {
         if (status.equals("presenting")) {
+            measureTimer();
             if (lastSampleTime == 0L) {
                 lastSampleTime = System.currentTimeMillis();
             }
             if (sensorEvent.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
                 acceleration[0] = sensorEvent.values[0];
+                tmx.setText("X: " + sensorEvent.values[0] + " m/s^2");
                 acceleration[1] = sensorEvent.values[1];
+                tmy.setText("Y: " + sensorEvent.values[1] + " m/s^2");
                 acceleration[2] = sensorEvent.values[2];
+                tmz.setText("Z: " + sensorEvent.values[2] + " m/s^2");
             }
             if (sensorEvent.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
                 stepCount = sensorEvent.values[0];
+                tms.setText("" + sensorEvent.values[0] + " steps");
             }
             if (sensorEvent.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
                 temperature = sensorEvent.values[0];
+                tt.setText("" + sensorEvent.values[0] + "C");
             }
             if (sensorEvent.sensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY) {
                 humidity = sensorEvent.values[0];
+                thu.setText("" + sensorEvent.values[0] + "%");
             }
             if (sensorEvent.sensor.getType() == Sensor.TYPE_PRESSURE) {
                 pressure = sensorEvent.values[0];
+                tp.setText("" + sensorEvent.values[0] + " hPa");
             }
             if (lastSampleTime == 0L || lastSampleTime + 50 < System.currentTimeMillis()) {
                 final JSONObject data = new JSONObject();
@@ -205,35 +233,24 @@ public class MainActivity extends Activity implements
                             x = (float) data.getDouble("x");
                             y = (float) data.getDouble("y");
                             z = (float) data.getDouble("z");
-                            g1 = (float) data.getDouble("g1");
-                            g2 = (float) data.getDouble("g2");
-                            g3 = (float) data.getDouble("g3");
                             heartrate = (float) data.getDouble("heartrate");
                             gr1 = (float) data.getDouble("gr1");
                             gr2 = (float) data.getDouble("gr2");
                             gr3 = (float) data.getDouble("gr3");
-                            r1 = (float) data.getDouble("r1");
-                            r2 = (float) data.getDouble("r2");
-                            r3 = (float) data.getDouble("r3");
                             steps = (float) data.getDouble("steps");
+                            light = (float) data.getDouble("light");
                             accRange = (float) data.getDouble("accRange");
                             watchtime = (float) data.getDouble("watchtime");
-                            sessionStartTime = (float) data.getDouble("sessionStartTime");
 
-                            tx.setText("X: " + x);
-                            ty.setText("Y: " + y);
-                            tz.setText("Z: " + z);
-                            tg1.setText("G1: " + g1);
-                            tg2.setText("G2: " + g2);
-                            tg3.setText("G3: " + g3);
-                            tgr1.setText("Gr1: " + gr1);
-                            tgr2.setText("Gr2: " + gr2);
-                            tgr3.setText("Gr3: " + gr3);
-                            tr1.setText("R1: " + r1);
-                            tr2.setText("R2: " + r2);
-                            tr3.setText("R3: " + r3);
-                            theartrate.setText("Heart Rate: " + heartrate);
-                            tsteps.setText("Steps Counter: " + steps);
+                            tx.setText("X: " + x + " m/s^2");
+                            ty.setText("Y: " + y + " m/s^2");
+                            tz.setText("Z: " + z + " m/s^2");
+                            tgr1.setText("G1: " + gr1 + " m/s^2");
+                            tgr2.setText("G2: " + gr2 + " m/s^2");
+                            tgr3.setText("G3: " + gr3 + " m/s^2");
+                            theartrate.setText("" + heartrate + " bpm");
+                            tsteps.setText("" + steps + " steps");
+                            tl.setText("" + light + " SI lux");
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -264,12 +281,11 @@ public class MainActivity extends Activity implements
                     // Set App Status
                     if (!status.equals("presenting")) {
                         wearReadings = new ArrayList<>();
-                        mobileReadings =  new ArrayList<>();
+                        mobileReadings = new ArrayList<>();
                         recordedScript = "";
                         tStart = System.currentTimeMillis();
                         status = "presenting";
-                    }
-                    else if (status.equals("presenting"))
+                    } else if (status.equals("presenting"))
                         stopPresentation();
                     // Set Data Transfer Path
                     PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(STATUS);
@@ -326,12 +342,34 @@ public class MainActivity extends Activity implements
         }
     }
 
+    public void measureTimer() {
+        double time = (System.currentTimeMillis() - tStart) / 1000.0;
+        int hour = (int) time / 3600;
+        int remainder = (int) time - hour * 3600;
+        int mins = remainder / 60;
+        remainder = remainder - mins * 60;
+        int secs = remainder;
+        int[] currentTime = {hour, mins, secs};
+
+        hours.setText((currentTime[0] < 10 ? "0" : "") + currentTime[0]);
+        minutes.setText((currentTime[1] < 10 ? "0" : "") + currentTime[1]);
+        seconds.setText((currentTime[2] < 10 ? "0" : "") + currentTime[2]);
+    }
+
     @Override
-    public void onConnectionSuspended(int i) {nodeConnected = false;}
+    public void onConnectionSuspended(int i) {
+        nodeConnected = false;
+    }
+
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {nodeConnected = false;}
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        nodeConnected = false;
+    }
+
     @Override
-    public final void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    public final void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
