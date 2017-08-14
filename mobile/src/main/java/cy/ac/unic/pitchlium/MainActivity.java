@@ -12,6 +12,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -292,7 +298,29 @@ public class MainActivity extends Activity implements
             finalData.put("mobileData", gson.toJson(mobileReadings));
             finalData.put("wearData", gson.toJson(wearReadings));
             finalData.put("script", recordedScript);
-            Log.e("DATA: ", finalData.toString());
+
+            // Instantiate the RequestQueue.
+            RequestQueue requstQueue = Volley.newRequestQueue(this);
+
+            // Request a string response from the provided URL.
+            JsonObjectRequest jsonobj = new JsonObjectRequest(
+                    Request.Method.POST,
+                    "https://pitchlium.herokuapp.com/",
+                    finalData,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Log.e("Results: ", response.toString());
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e("Error: ", error.toString());
+                        }
+                    }
+            );
+            requstQueue.add(jsonobj);
         } catch (JSONException e) {
             e.printStackTrace();
         }
