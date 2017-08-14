@@ -43,7 +43,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     private GoogleApiClient mGoogleApiClient;
     private boolean nodeConnected = false;
     private long lastSampleTime = 0L;
-    private long session = 0L;
     private String status = "idle";
 
     // Set Data Paths for the Sensors
@@ -58,6 +57,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     private float[] rotVector = new float[3];
     private float heartRate = 0;
     private float stepCount = 0;
+    private float light = 0;
 
     // Initial Global Sensors
     Sensor accelerometerS;
@@ -66,11 +66,11 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     Sensor gyroscopeS;
     Sensor heartrateS;
     Sensor stepCounterS;
+    Sensor lightS;
 
     private SpeechRecognizer sr = null;
     private Intent speechIntent = null;
     StringBuilder script = new StringBuilder();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +90,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         gyroscopeS = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         heartrateS = mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
         stepCounterS = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        lightS = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
         // Setting the TexViews to Show Data
         TextView accelText = findViewById(R.id.accelerometer);
@@ -123,6 +124,9 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         if (stepCounterS != null) {
             stepCounterText.setTextColor(this.getResources().getColor(R.color.green));
             mSensorManager.registerListener(this, stepCounterS, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        if (lightS != null) {
+            mSensorManager.registerListener(this, lightS, SensorManager.SENSOR_DELAY_NORMAL);
         }
 
         speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -207,62 +211,67 @@ public class MainActivity extends WearableActivity implements SensorEventListene
 
     @Override
     public void onSensorChanged(final SensorEvent sensorEvent) {
-        if (lastSampleTime == 0L) {
-            lastSampleTime = System.currentTimeMillis();
-        }
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-            acceleration[0] = sensorEvent.values[0];
-            acceleration[1] = sensorEvent.values[1];
-            acceleration[2] = sensorEvent.values[2];
-        }
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_HEART_RATE) {
-            heartRate = sensorEvent.values[0];
-        }
-
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            gyroscope[0] = sensorEvent.values[0];
-            gyroscope[1] = sensorEvent.values[1];
-            gyroscope[2] = sensorEvent.values[2];
-        }
-
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_GRAVITY) {
-            gravity[0] = sensorEvent.values[0];
-            gravity[1] = sensorEvent.values[1];
-            gravity[2] = sensorEvent.values[2];
-        }
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-            rotVector[0] = sensorEvent.values[0];
-            rotVector[1] = sensorEvent.values[1];
-            rotVector[2] = sensorEvent.values[2];
-        }
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
-            stepCount = sensorEvent.values[0];
-        }
-
-        if (lastSampleTime == 0L || lastSampleTime + 50 < System.currentTimeMillis()) {
-            final JSONObject data = new JSONObject();
-            try {
-                data.put("x", acceleration[0]);
-                data.put("y", acceleration[1]);
-                data.put("z", acceleration[2]);
-                data.put("g1", gyroscope[0]);
-                data.put("g2", gyroscope[1]);
-                data.put("g3", gyroscope[2]);
-                data.put("heartrate", heartRate);
-                data.put("gr1", gravity[0]);
-                data.put("gr2", gravity[1]);
-                data.put("gr3", gravity[2]);
-                data.put("r1", rotVector[0]);
-                data.put("r2", rotVector[1]);
-                data.put("r3", rotVector[2]);
-                data.put("steps", stepCount);
-                data.put("accRange", accelerometerS.getMaximumRange());
-                data.put("watchtime", System.currentTimeMillis());
-                data.put("sessionStartTime", session);
+        if (status.equals("presenting")) {
+            if (lastSampleTime == 0L) {
                 lastSampleTime = System.currentTimeMillis();
-                sendData(data.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
+            }
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+                acceleration[0] = sensorEvent.values[0];
+                acceleration[1] = sensorEvent.values[1];
+                acceleration[2] = sensorEvent.values[2];
+            }
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_HEART_RATE) {
+                heartRate = sensorEvent.values[0];
+            }
+
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+                gyroscope[0] = sensorEvent.values[0];
+                gyroscope[1] = sensorEvent.values[1];
+                gyroscope[2] = sensorEvent.values[2];
+            }
+
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_GRAVITY) {
+                gravity[0] = sensorEvent.values[0];
+                gravity[1] = sensorEvent.values[1];
+                gravity[2] = sensorEvent.values[2];
+            }
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+                rotVector[0] = sensorEvent.values[0];
+                rotVector[1] = sensorEvent.values[1];
+                rotVector[2] = sensorEvent.values[2];
+            }
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+                stepCount = sensorEvent.values[0];
+            }
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_LIGHT) {
+                light = sensorEvent.values[0];
+            }
+
+            if (lastSampleTime == 0L || lastSampleTime + 50 < System.currentTimeMillis()) {
+                final JSONObject data = new JSONObject();
+                try {
+                    data.put("x", acceleration[0]);
+                    data.put("y", acceleration[1]);
+                    data.put("z", acceleration[2]);
+                    data.put("g1", gyroscope[0]);
+                    data.put("g2", gyroscope[1]);
+                    data.put("g3", gyroscope[2]);
+                    data.put("heartrate", heartRate);
+                    data.put("gr1", gravity[0]);
+                    data.put("gr2", gravity[1]);
+                    data.put("gr3", gravity[2]);
+                    data.put("r1", rotVector[0]);
+                    data.put("r2", rotVector[1]);
+                    data.put("r3", rotVector[2]);
+                    data.put("steps", stepCount);
+                    data.put("light", light);
+                    data.put("accRange", accelerometerS.getMaximumRange());
+                    data.put("watchtime", System.currentTimeMillis());
+                    lastSampleTime = System.currentTimeMillis();
+                    sendData(data.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
