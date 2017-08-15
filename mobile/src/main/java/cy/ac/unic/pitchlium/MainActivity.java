@@ -382,42 +382,40 @@ public class MainActivity extends AppCompatActivity implements
 
     public void stopPresentation() {
         status = "analyzing";
-        presentationDuration = (System.currentTimeMillis() - tStart) / 1000.0;
-        List<Double> movementPercentages =  calculateMovementPercentage(movements);
-        List<Double> handMovementPercentages = calculateMovementPercentage(handMovements);
         final JSONObject finalData = new JSONObject();
         Gson gson = new Gson();
         try {
-            finalData.put("duration", presentationDuration);
-            finalData.put("movementPercentages", gson.toJson(movementPercentages));
-//            finalData.put("handMovementPercentages", gson.toJson(handMovementPercentages));
+            finalData.put("duration", (System.currentTimeMillis() - tStart) / 1000.0);
+            finalData.put("movementPercentages", gson.toJson(calculateMovementPercentage(movements)));
+            finalData.put("handMovementPercentages", gson.toJson(calculateMovementPercentage(handMovements)));
             finalData.put("facingCheck", checkDirectionFacing());
-            finalData.put("stressCheck", checkHeartrate());
-            finalData.put("averageHeartrate", averageHeartrate);
+            finalData.put("stressCheck", gson.toJson(checkAverageThreshold(heartrate, 0, 80)));
+            finalData.put("temperatureCheck", gson.toJson(checkAverageThreshold(temperature, 20, 26)));
+            finalData.put("humidityCheck", gson.toJson(checkAverageThreshold(humidity, 30, 60)));
+            finalData.put("pressureCheck", gson.toJson(checkAverageThreshold(pressure, 990, 1020)));
             finalData.put("script", recordedScript);
-            Log.e("Percentages: ", movementPercentages.toString());
-//            // Instantiate the RequestQueue.
-//            RequestQueue requstQueue = Volley.newRequestQueue(this);
-//
-//            // Request a string response from the provided URL.
-//            JsonObjectRequest jsonobj = new JsonObjectRequest(
-//                    Request.Method.POST,
-//                    "https://pitchlium.herokuapp.com/",
-//                    finalData,
-//                    new Response.Listener<JSONObject>() {
-//                        @Override
-//                        public void onResponse(JSONObject response) {
-//                            Log.e("Results: ", response.toString());
-//                        }
-//                    },
-//                    new Response.ErrorListener() {
-//                        @Override
-//                        public void onErrorResponse(VolleyError error) {
-//                            Log.e("Error: ", error.toString());
-//                        }
-//                    }
-//            );
-//            requstQueue.add(jsonobj);
+            // Instantiate the RequestQueue.
+            RequestQueue requstQueue = Volley.newRequestQueue(this);
+
+            // Request a string response from the provided URL.
+            JsonObjectRequest jsonobj = new JsonObjectRequest(
+                    Request.Method.POST,
+                    "https://pitchlium.herokuapp.com/",
+                    finalData,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Log.e("Results: ", response.toString());
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e("Error: ", error.toString());
+                        }
+                    }
+            );
+            requstQueue.add(jsonobj);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -430,8 +428,13 @@ public class MainActivity extends AppCompatActivity implements
             for (double move : thisMovements)
                 sum += move;
             for (double move : thisMovements)
-                results.add(RoundTo2Decimals((move / sum) * 100));
+                if (sum != 0)
+                    results.add(RoundTo2Decimals((move / sum) * 100));
+                else
+                    results.add(0d);
         }
+        else
+            results.add(0d);
         return results;
     }
 
@@ -449,16 +452,18 @@ public class MainActivity extends AppCompatActivity implements
         return valid;
     }
 
-    public boolean checkHeartrate() {
+    public String[] checkAverageThreshold(List<Float> list, float min, float max) {
         boolean valid = true;
         float sum = 0;
-        for (float rate: heartrate) {
-            sum += rate;
-            if (rate > 80)
+        for (float item: list) {
+            sum += item;
+            if (item < min || item > max)
                 valid = false;
         }
-        averageHeartrate = sum / (float) heartrate.size();
-        return valid;
+        String[] results = new String[2];
+        results[0] = (valid ? "true" : "false");
+        results[1] = "" + RoundTo2Decimals(((double) sum / (double) list.size()));
+        return results;
     }
 
     public double RoundTo2Decimals(double val) {

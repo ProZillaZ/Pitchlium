@@ -335,45 +335,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="10dp" />
 
-                <!-- Gyroscope -->
-                <TextView
-                    android:id="@+id/mgyro"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/gyro"
-                    android:textAlignment="viewStart"
-                    android:textStyle="bold"
-                    tools:layout_editor_absoluteX="16dp"
-                    tools:layout_editor_absoluteY="16dp" />
-
-                <TextView
-                    android:id="@+id/g1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/no_data"
-                    tools:layout_editor_absoluteX="16dp"
-                    tools:layout_editor_absoluteY="33dp" />
-
-                <TextView
-                    android:id="@+id/g2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/no_data"
-                    tools:layout_editor_absoluteX="16dp"
-                    tools:layout_editor_absoluteY="50dp" />
-
-                <TextView
-                    android:id="@+id/g3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/no_data"
-                    tools:layout_editor_absoluteX="16dp"
-                    tools:layout_editor_absoluteY="67dp" />
-
-                <Space
-                    android:layout_width="wrap_content"
-                    android:layout_height="10dp" />
-
                 <!-- Magnetic Field -->
                 <TextView
                     android:id="@+id/mMagnetic"
