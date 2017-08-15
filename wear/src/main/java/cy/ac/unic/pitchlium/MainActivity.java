@@ -52,7 +52,10 @@ public class MainActivity extends WearableActivity implements SensorEventListene
 
     // Sensor Data Global Variable
     float[] acceleration = new float[3], gravity = new float[3];
-    float heartRate = 0, stepCount = 0, light = 0;
+    float heartRate = 0, stepCount = 0, light = 0, totalAcceleration = 0, lastTotalAcceleration = 0;
+    double[] movements = {0,0,0,0,0};
+    String movementLabel = "";
+    float movementChange = 0F;
     long tStart = 0;
 
     // Initial Global Sensors
@@ -62,11 +65,19 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     Sensor stepCounterS;
     Sensor lightS;
 
+    // View Initialize
     TextView hours, minutes, seconds, tStatus;
 
+    // Voice Recognition Initialize
     private SpeechRecognizer sr = null;
     private Intent speechIntent = null;
     StringBuilder script = new StringBuilder();
+
+    // Movement Thresholds
+    final float THRESHOLD_STEADY = (float) 0.10;
+    final float THRESHOLD_SLOW_MOVEMENT = (float) 0.15;
+    final float THRESHOLD_MODERATE_MOVEMENT = (float) 0.30;
+    final float THRESHOLD_FAST_MOVEMENT = (float) 0.80;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,11 +209,19 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                 acceleration[0] = sensorEvent.values[0];
                 acceleration[1] = sensorEvent.values[1];
                 acceleration[2] = sensorEvent.values[2];
+                totalAcceleration = (float) Math.sqrt(
+                                sensorEvent.values[0] * sensorEvent.values[0] +
+                                sensorEvent.values[1] * sensorEvent.values[1] +
+                                sensorEvent.values[2] * sensorEvent.values[2]
+                );
+                movementChange = Math.abs(lastTotalAcceleration - totalAcceleration);
+                if (lastSampleTime != 0L)
+                    movementLabel = recordMovement();
+                lastTotalAcceleration = totalAcceleration;
             }
             if (sensorEvent.sensor.getType() == Sensor.TYPE_HEART_RATE) {
                 heartRate = sensorEvent.values[0];
             }
-
             if (sensorEvent.sensor.getType() == Sensor.TYPE_GRAVITY) {
                 gravity[0] = sensorEvent.values[0];
                 gravity[1] = sensorEvent.values[1];
@@ -215,12 +234,21 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                 light = sensorEvent.values[0];
             }
 
-            if (lastSampleTime == 0L || lastSampleTime + 50 < System.currentTimeMillis()) {
+            if (lastSampleTime == 0L || lastSampleTime + 100 < System.currentTimeMillis()) {
+                lastSampleTime = System.currentTimeMillis();
                 final JSONObject data = new JSONObject();
                 try {
                     data.put("x", acceleration[0]);
                     data.put("y", acceleration[1]);
                     data.put("z", acceleration[2]);
+                    data.put("total", totalAcceleration);
+                    data.put("movement", movementLabel);
+                    data.put("diff", movementChange);
+                    data.put("move1", movements[0]);
+                    data.put("move2", movements[1]);
+                    data.put("move3", movements[2]);
+                    data.put("move4", movements[3]);
+                    data.put("move5", movements[4]);
                     data.put("heartrate", heartRate);
                     data.put("gr1", gravity[0]);
                     data.put("gr2", gravity[1]);
@@ -229,12 +257,30 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                     data.put("light", light);
                     data.put("accRange", accelerometerS.getMaximumRange());
                     data.put("watchtime", System.currentTimeMillis());
-                    lastSampleTime = System.currentTimeMillis();
                     sendData(data.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    public String recordMovement() {
+        if (movementChange <= THRESHOLD_STEADY) {
+            movements[0]++;
+            return "Steady";
+        } else if (movementChange > THRESHOLD_STEADY && movementChange <= THRESHOLD_SLOW_MOVEMENT) {
+            movements[1]++;
+            return "Slow Movements";
+        } else if (movementChange > THRESHOLD_SLOW_MOVEMENT && movementChange <= THRESHOLD_MODERATE_MOVEMENT) {
+            movements[2]++;
+            return "Moderate Movements";
+        } else if (movementChange > THRESHOLD_MODERATE_MOVEMENT && movementChange <= THRESHOLD_FAST_MOVEMENT) {
+            movements[3]++;
+            return "Fast Movements";
+        } else {
+            movements[4]++;
+            return "Crazy Movements!";
         }
     }
 
@@ -378,13 +424,10 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     @Override
     protected void onResume() {
         super.onResume();
-        mGoogleApiClient.connect();
     }
 
     @Override
     protected void onPause() {
-        Wearable.DataApi.removeListener(mGoogleApiClient, this);
-        mGoogleApiClient.disconnect();
         super.onPause();
     }
 }

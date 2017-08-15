@@ -4,6 +4,7 @@
     <string name="accelerometer">Accelerometer</string>
     <string name="gyro">Gyroscope</string>
     <string name="gravity">Gravity</string>
+    <string name="magnetic">Magnetic Field</string>
     <string name="rotation">Rotation Vector</string>
     <string name="heart">Heart Rate</string>
     <string name="step">Step Counter</string>
@@ -13,11 +14,17 @@
     <string name="status">Idle</string>
     <string name="tab1">Presentation</string>
     <string name="tab2">Debug Data</string>
-    <string name="mobile">Handheld Sensors</string>
+    <string name="tab3">Debug Calculations</string>
+    <string name="mobile">Phone Sensors</string>
     <string name="wear">Wearable Sensors</string>
+    <string name="rmobile">Phone Results</string>
+    <string name="rwear">Wearable Results</string>
     <string name="temp">Room Temperature</string>
     <string name="humidity">Room Humidity</string>
     <string name="pressure">Room Pressure</string>
+    <string name="totalAccel">Total Directionless Acceleration</string>
+    <string name="totalChange">Total Acceleration Change</string>
+    <string name="detectedMovement">Detected Movement</string>
     <string name="zeros">00</string>
     <string name="dotdot">:</string>
 </resources>

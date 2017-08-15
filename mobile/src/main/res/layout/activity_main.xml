@@ -102,8 +102,6 @@
                 android:layout_weight="0.5"
                 android:orientation="vertical">
 
-                <!-- Accelerometer -->
-
                 <TextView
                     android:id="@+id/textView"
                     android:layout_width="match_parent"
@@ -120,6 +118,8 @@
                 <Space
                     android:layout_width="match_parent"
                     android:layout_height="10dp" />
+
+                <!-- Accelerometer -->
 
                 <TextView
                     android:id="@+id/accelerometer"
@@ -158,8 +158,6 @@
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="10dp" />
-
-                <!-- Gyroscope -->
 
                 <!-- Gravity -->
 
@@ -278,8 +276,6 @@
                 android:layout_weight="0.5"
                 android:orientation="vertical">
 
-                <!-- Accelerometer -->
-
                 <TextView
                     android:id="@+id/textView3"
                     android:layout_width="match_parent"
@@ -298,6 +294,8 @@
                 <Space
                     android:layout_width="match_parent"
                     android:layout_height="10dp" />
+
+                <!-- Accelerometer -->
 
                 <TextView
                     android:id="@+id/maccelerometer"
@@ -327,6 +325,84 @@
 
                 <TextView
                     android:id="@+id/mz"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="67dp" />
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="10dp" />
+
+                <!-- Gyroscope -->
+                <TextView
+                    android:id="@+id/mgyro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gyro"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="16dp" />
+
+                <TextView
+                    android:id="@+id/g1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="33dp" />
+
+                <TextView
+                    android:id="@+id/g2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="50dp" />
+
+                <TextView
+                    android:id="@+id/g3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="67dp" />
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="10dp" />
+
+                <!-- Magnetic Field -->
+                <TextView
+                    android:id="@+id/mMagnetic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/magnetic"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="16dp" />
+
+                <TextView
+                    android:id="@+id/m1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="33dp" />
+
+                <TextView
+                    android:id="@+id/m2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="50dp" />
+
+                <TextView
+                    android:id="@+id/m3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/no_data"
@@ -435,6 +511,203 @@
             </LinearLayout>
 
         </LinearLayout>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/content_calculations"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rwear"
+                    android:textAllCaps="true"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <View
+                    style="@style/Divider"
+                    android:layout_height="2dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Total Acceleration -->
+                <TextView
+                    android:id="@+id/totalAcceleration"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/totalAccel"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/totalAccel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="67dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Total Acceleration Change -->
+                <TextView
+                    android:id="@+id/totalAccelerationChange"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/totalChange"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/totalAccelChange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="67dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Detected Movement -->
+                <TextView
+                    android:id="@+id/detectedMovement"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/detectedMovement"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/detectMov"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="67dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rmobile"
+                    android:textAllCaps="true"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <View
+                    style="@style/Divider"
+                    android:layout_height="2dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Total Acceleration -->
+                <TextView
+                    android:id="@+id/mTotalAcceleration"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/totalAccel"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/mTotalAccel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="67dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Total Acceleration Change -->
+                <TextView
+                    android:id="@+id/mTotalAccelerationChange"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/totalChange"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/mtotalAccelChange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="67dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
+
+                <!-- Detected Movement -->
+                <TextView
+                    android:id="@+id/mDetectedMovement"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/detectedMovement"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/mdetectMov"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="67dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
     </FrameLayout>
 
     <android.support.design.widget.BottomNavigationView
