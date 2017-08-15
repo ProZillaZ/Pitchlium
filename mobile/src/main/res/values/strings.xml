@@ -22,6 +22,7 @@
     <string name="temp">Room Temperature</string>
     <string name="humidity">Room Humidity</string>
     <string name="pressure">Room Pressure</string>
+    <string name="compass">Direction Facing</string>
     <string name="totalAccel">Total Directionless Acceleration</string>
     <string name="totalChange">Total Acceleration Change</string>
     <string name="detectedMovement">Detected Movement</string>

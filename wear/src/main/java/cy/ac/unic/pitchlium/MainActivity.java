@@ -255,8 +255,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                     data.put("gr3", gravity[2]);
                     data.put("steps", stepCount);
                     data.put("light", light);
-                    data.put("accRange", accelerometerS.getMaximumRange());
-                    data.put("watchtime", System.currentTimeMillis());
                     sendData(data.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();

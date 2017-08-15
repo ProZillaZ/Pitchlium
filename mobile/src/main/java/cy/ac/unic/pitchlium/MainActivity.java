@@ -41,6 +41,7 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -64,27 +65,28 @@ public class MainActivity extends AppCompatActivity implements
     final String SCRIPT = "/script";
 
     // Initialize View Elements
-    TextView tx, tmx, ty, tTotalAccel, tmy, tz, tmz, tmTotalAccel, theartrate, tgr1, tgr2, tgr3,
-             tsteps, tms, tt, thu, tp, tl, tg1, tg2, tg3, tm1, tm2, tm3, hours, minutes, seconds,
+    TextView tx, tmx, ty, tTotalAccel, tmy, tz, tmz, tmTotalAccel, theartrate, tgr1, tgr2, tgr3, tc,
+             tsteps, tms, tt, thu, tp, tl, tm1, tm2, tm3, hours, minutes, seconds,
              tTotalChange, tmTotalChange, tDetectMove, tmDetectMove;
     Button startPresentationBtn;
 
     // Initialize Sensors
     SensorManager mSensorManager;
-    Sensor mAccelerometer, mStepCounter, mTemperature, mHumidity, mPressure, mGyro, mMagnetic;
+    Sensor mAccelerometer, mOrientation, mStepCounter, mTemperature, mHumidity, mPressure, mMagnetic;
 
     // Phone Sensor Data
-    float[] gyroscope = new float[3], magnetic = new float[3];
-    float stepCount = 0, temperature = 0, humidity = 0, pressure = 0, totalAcceleration = 0, lastTotalAcceleration = 0;
+    float stepCount = 0, totalAcceleration = 0, lastTotalAcceleration = 0;
+    List<Float> temperature = new ArrayList<>(), humidity = new ArrayList<>(),
+            pressure = new ArrayList<>(), light = new ArrayList<>(), degrees = new ArrayList<>();
     double[] movements = {0,0,0,0,0,0,0};
 
     // Wear Sensor Data
-    float x, y, z, total, heartrate, gr1, gr2, gr3, steps, accRange, watchtime, light;
+    float steps = 0;
+    List<Float> heartrate = new ArrayList<>();
+    float averageHeartrate = 0;
     double[] handMovements = {0,0,0,0,0};
 
     // Results
-    List<String> wearReadings = new ArrayList<>();
-    List<String> mobileReadings = new ArrayList<>();
     String recordedScript = "";
 
     // Movement Thresholds
@@ -143,9 +145,6 @@ public class MainActivity extends AppCompatActivity implements
         tgr1 = (TextView) findViewById(R.id.gr1);
         tgr2 = (TextView) findViewById(R.id.gr2);
         tgr3 = (TextView) findViewById(R.id.gr3);
-        tg1 = (TextView) findViewById(R.id.g1);
-        tg2 = (TextView) findViewById(R.id.g2);
-        tg3 = (TextView) findViewById(R.id.g3);
         tm1 = (TextView) findViewById(R.id.m1);
         tm2 = (TextView) findViewById(R.id.m2);
         tm3 = (TextView) findViewById(R.id.m3);
@@ -162,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements
         thu = (TextView) findViewById(R.id.hu);
         tp = (TextView) findViewById(R.id.p);
         tl = (TextView) findViewById(R.id.l);
+        tc = (TextView) findViewById(R.id.c);
         hours = (TextView) findViewById(R.id.hour);
         minutes = (TextView) findViewById(R.id.minute);
         seconds = (TextView) findViewById(R.id.second);
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-        mGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
         mMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         mStepCounter = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         mTemperature = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
@@ -184,13 +184,13 @@ public class MainActivity extends AppCompatActivity implements
 
         // Check If All Sensors are Compatible
         if (mAccelerometer != null) {
-            mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
         }
-        if (mGyro != null) {
-            mSensorManager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_NORMAL);
+        if (mOrientation != null) {
+            mSensorManager.registerListener(this, mOrientation, SensorManager.SENSOR_DELAY_NORMAL);
         }
         if (mMagnetic != null) {
-            mSensorManager.registerListener(this, mMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(this, mMagnetic, SensorManager.SENSOR_DELAY_GAME);
         }
         if (mStepCounter != null) {
             mSensorManager.registerListener(this, mStepCounter, SensorManager.SENSOR_DELAY_NORMAL);
@@ -228,62 +228,37 @@ public class MainActivity extends AppCompatActivity implements
                         sensorEvent.values[1] * sensorEvent.values[1] +
                         sensorEvent.values[2] * sensorEvent.values[2]
                 );
-                tmTotalAccel.setText("Total: " + totalAcceleration + " m/s^2");
+                tmTotalAccel.setText("" + totalAcceleration + " m/s^2");
                 if (lastSampleTime != 0L)
                     recordMovement();
                 lastTotalAcceleration = totalAcceleration;
             }
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                gyroscope[0] = sensorEvent.values[0];
-                tg1.setText("G1: " + sensorEvent.values[0] + " m/s^2");
-                gyroscope[1] = sensorEvent.values[1];
-                tg2.setText("G2: " + sensorEvent.values[1] + " m/s^2");
-                gyroscope[2] = sensorEvent.values[2];
-                tg3.setText("G3: " + sensorEvent.values[2] + " m/s^2");
+            else if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
+                degrees.add((float) Math.round(sensorEvent.values[0]));
+                tc.setText("" + Math.round(sensorEvent.values[0]) + " Degrees");
             }
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-                magnetic[0] = sensorEvent.values[0];
+            else if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
                 tm1.setText("M1: " + sensorEvent.values[0] + " uT");
-                magnetic[1] = sensorEvent.values[1];
                 tm2.setText("M2: " + sensorEvent.values[1] + " uT");
-                magnetic[2] = sensorEvent.values[2];
                 tm3.setText("M3: " + sensorEvent.values[2] + " uT");
             }
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+            else if (sensorEvent.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
                 stepCount = sensorEvent.values[0];
                 tms.setText("" + sensorEvent.values[0] + " steps");
             }
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
-                temperature = sensorEvent.values[0];
+            else if (sensorEvent.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
+                temperature.add(sensorEvent.values[0]);
                 tt.setText("" + sensorEvent.values[0] + "C");
             }
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY) {
-                humidity = sensorEvent.values[0];
+            else if (sensorEvent.sensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY) {
+                humidity.add(sensorEvent.values[0]);
                 thu.setText("" + sensorEvent.values[0] + "%");
             }
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_PRESSURE) {
-                pressure = sensorEvent.values[0];
+            else if (sensorEvent.sensor.getType() == Sensor.TYPE_PRESSURE) {
+                pressure.add(sensorEvent.values[0]);
                 tp.setText("" + sensorEvent.values[0] + " hPa");
             }
-
-            if (lastSampleTime == 0L || lastSampleTime + 100 < System.currentTimeMillis()) {
-                lastSampleTime = System.currentTimeMillis();
-                final JSONObject data = new JSONObject();
-                try {
-                    data.put("g1", gyroscope[0]);
-                    data.put("g2", gyroscope[1]);
-                    data.put("g3", gyroscope[2]);
-                    data.put("steps", stepCount);
-                    data.put("temp", temperature);
-                    data.put("humidity", humidity);
-                    data.put("pressure", pressure);
-                    data.put("accRange", mAccelerometer.getMaximumRange());
-                    data.put("mobiletime", System.currentTimeMillis());
-                    mobileReadings.add(data.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
+            lastSampleTime = System.currentTimeMillis();
         }
     }
 
@@ -323,39 +298,29 @@ public class MainActivity extends AppCompatActivity implements
                     DataItem item = event.getDataItem();
                     if (item.getUri().getPath().compareTo(PATH) == 0) {
                         DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
-                        wearReadings.add(dataMap.getString("SensorData"));
                         try {
                             final JSONObject data = new JSONObject(dataMap.getString("SensorData"));
-                            x = (float) data.getDouble("x");
-                            y = (float) data.getDouble("y");
-                            z = (float) data.getDouble("z");
-                            total = (float) data.getDouble("total");
                             handMovements[0] = (float) data.getDouble("move1");
                             handMovements[1] = (float) data.getDouble("move2");
                             handMovements[2] = (float) data.getDouble("move3");
                             handMovements[3] = (float) data.getDouble("move4");
                             handMovements[4] = (float) data.getDouble("move5");
-                            heartrate = (float) data.getDouble("heartrate");
-                            gr1 = (float) data.getDouble("gr1");
-                            gr2 = (float) data.getDouble("gr2");
-                            gr3 = (float) data.getDouble("gr3");
+                            heartrate.add((float) data.getDouble("heartrate"));
                             steps = (float) data.getDouble("steps");
-                            light = (float) data.getDouble("light");
-                            accRange = (float) data.getDouble("accRange");
-                            watchtime = (float) data.getDouble("watchtime");
+                            light.add((float) data.getDouble("light"));
 
-                            tx.setText("X: " + x + " m/s^2");
-                            ty.setText("Y: " + y + " m/s^2");
-                            tz.setText("Z: " + z + " m/s^2");
-                            tTotalAccel.setText("" + total + " m/s^2");
-                            tTotalChange.setText("" + (float) data.getDouble("diff") + "");
+                            tx.setText("X: " + data.getDouble("x") + " m/s^2");
+                            ty.setText("Y: " + data.getDouble("y") + " m/s^2");
+                            tz.setText("Z: " + data.getDouble("z") + " m/s^2");
+                            tTotalAccel.setText("" + data.getDouble("total") + " m/s^2");
+                            tTotalChange.setText("" + data.getDouble("diff") + "");
                             tDetectMove.setText("" + data.getString("movement") + "");
-                            tgr1.setText("G1: " + gr1 + " m/s^2");
-                            tgr2.setText("G2: " + gr2 + " m/s^2");
-                            tgr3.setText("G3: " + gr3 + " m/s^2");
-                            theartrate.setText("" + heartrate + " bpm");
+                            tgr1.setText("G1: " + data.getDouble("gr1") + " m/s^2");
+                            tgr2.setText("G2: " + data.getDouble("gr2") + " m/s^2");
+                            tgr3.setText("G3: " + data.getDouble("gr3") + " m/s^2");
+                            theartrate.setText("" + data.getDouble("heartrate") + " bpm");
                             tsteps.setText("" + steps + " steps");
-                            tl.setText("" + light + " SI lux");
+                            tl.setText("" + data.getDouble("light") + " SI lux");
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -366,6 +331,15 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         }
+    }
+
+    public void initializeData() {
+        temperature = new ArrayList<>();
+        pressure = new ArrayList<>();
+        humidity = new ArrayList<>();
+        recordedScript = "";
+        Arrays.fill(movements, 0);
+        tStart = System.currentTimeMillis();
     }
 
     public void startPresentation() {
@@ -385,10 +359,7 @@ public class MainActivity extends AppCompatActivity implements
                 if (mGoogleApiClient.isConnected()) {
                     // Set App Status
                     if (!status.equals("presenting")) {
-                        wearReadings = new ArrayList<>();
-                        mobileReadings = new ArrayList<>();
-                        recordedScript = "";
-                        tStart = System.currentTimeMillis();
+                        initializeData();
                         status = "presenting";
                     } else if (status.equals("presenting"))
                         stopPresentation();
@@ -412,14 +383,17 @@ public class MainActivity extends AppCompatActivity implements
     public void stopPresentation() {
         status = "analyzing";
         presentationDuration = (System.currentTimeMillis() - tStart) / 1000.0;
-        List<Double> movementPercentages = calculateMovementPercentage(movements);
+        List<Double> movementPercentages =  calculateMovementPercentage(movements);
         List<Double> handMovementPercentages = calculateMovementPercentage(handMovements);
         final JSONObject finalData = new JSONObject();
         Gson gson = new Gson();
         try {
             finalData.put("duration", presentationDuration);
             finalData.put("movementPercentages", gson.toJson(movementPercentages));
-            finalData.put("handMovementPercentages", gson.toJson(handMovementPercentages));
+//            finalData.put("handMovementPercentages", gson.toJson(handMovementPercentages));
+            finalData.put("facingCheck", checkDirectionFacing());
+            finalData.put("stressCheck", checkHeartrate());
+            finalData.put("averageHeartrate", averageHeartrate);
             finalData.put("script", recordedScript);
             Log.e("Percentages: ", movementPercentages.toString());
 //            // Instantiate the RequestQueue.
@@ -452,11 +426,39 @@ public class MainActivity extends AppCompatActivity implements
     public List<Double> calculateMovementPercentage(double[] thisMovements) {
         double sum = 0;
         List<Double> results = new ArrayList<>();
-        for (double move : thisMovements)
-            sum += move;
-        for (double move : thisMovements)
-            results.add(RoundTo2Decimals((move / sum) * 100));
+        if (thisMovements.length > 0) {
+            for (double move : thisMovements)
+                sum += move;
+            for (double move : thisMovements)
+                results.add(RoundTo2Decimals((move / sum) * 100));
+        }
         return results;
+    }
+
+    public boolean checkDirectionFacing() {
+        boolean valid = true;
+        float min = degrees.get(0), max = degrees.get(0);
+        for (float degree: degrees) {
+            if (degree > max)
+                max = degree;
+            else if (degree < min)
+                min = degree;
+        }
+        if (max - min > 150)
+            valid = false;
+        return valid;
+    }
+
+    public boolean checkHeartrate() {
+        boolean valid = true;
+        float sum = 0;
+        for (float rate: heartrate) {
+            sum += rate;
+            if (rate > 80)
+                valid = false;
+        }
+        averageHeartrate = sum / (float) heartrate.size();
+        return valid;
     }
 
     public double RoundTo2Decimals(double val) {
@@ -473,9 +475,9 @@ public class MainActivity extends AppCompatActivity implements
         int secs = remainder;
         int[] currentTime = {hour, mins, secs};
 
-        hours.setText((currentTime[0] < 10 ? "0" : "") + currentTime[0]);
-        minutes.setText((currentTime[1] < 10 ? "0" : "") + currentTime[1]);
-        seconds.setText((currentTime[2] < 10 ? "0" : "") + currentTime[2]);
+        hours.setText("" + (currentTime[0] < 10 ? "0" : "") + currentTime[0]);
+        minutes.setText("" + (currentTime[1] < 10 ? "0" : "") + currentTime[1]);
+        seconds.setText("" + (currentTime[2] < 10 ? "0" : "") + currentTime[2]);
     }
 
     @Override
@@ -497,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onResume();
         mGoogleApiClient.connect();
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mOrientation, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mHumidity, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mStepCounter, SensorManager.SENSOR_DELAY_NORMAL);

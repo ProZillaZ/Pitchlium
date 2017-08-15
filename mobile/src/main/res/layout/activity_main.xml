@@ -508,6 +508,27 @@
                 <Space
                     android:layout_width="match_parent"
                     android:layout_height="10dp" />
+
+                <!-- Compass -->
+                <TextView
+                    android:id="@+id/compass"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/compass"
+                    android:textAlignment="viewStart"
+                    android:textStyle="bold"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
+                <TextView
+                    android:id="@+id/c"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:textAlignment="viewStart"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="181dp" />
+
             </LinearLayout>
 
         </LinearLayout>
