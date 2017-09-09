@@ -5,10 +5,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements
     GoogleApiClient mGoogleApiClient;
     long lastSampleTime = 0L;
     String status = "idle";
+    String session = "";
+    String script = "";
     boolean nodeConnected = false;
     long tStart = 0;
     double presentationDuration = 0;
@@ -62,12 +67,13 @@ public class MainActivity extends AppCompatActivity implements
     // Data Routes
     final String PATH = "/sensors";
     final String STATUS = "/status";
+    final String WEAR_STATUS = "/wearStatus";
     final String SCRIPT = "/script";
 
     // Initialize View Elements
     TextView tx, tmx, ty, tTotalAccel, tmy, tz, tmz, tmTotalAccel, theartrate, tgr1, tgr2, tgr3, tc,
              tsteps, tms, tt, thu, tp, tl, tm1, tm2, tm3, hours, minutes, seconds,
-             tTotalChange, tmTotalChange, tDetectMove, tmDetectMove;
+             tTotalChange, tmTotalChange, tDetectMove, tmDetectMove, scriptText;
     Button startPresentationBtn;
 
     // Initialize Sensors
@@ -88,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements
 
     // Results
     String recordedScript = "";
+    volatile boolean ready = false;
 
     // Movement Thresholds
     final float THRESHOLD_STEADY = (float) 0.15;
@@ -166,6 +173,9 @@ public class MainActivity extends AppCompatActivity implements
         minutes = (TextView) findViewById(R.id.minute);
         seconds = (TextView) findViewById(R.id.second);
 
+        scriptText = (TextView)findViewById(R.id.scriptText);
+        scriptText.setMovementMethod(ScrollingMovementMethod.getInstance());
+
         startPresentationBtn = (Button) findViewById(R.id.present);
         startPresentationBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -211,6 +221,41 @@ public class MainActivity extends AppCompatActivity implements
                 .addOnConnectionFailedListener(this)
                 .build();
 
+        Uri data = this.getIntent().getData();
+        if (data != null && data.isHierarchical()) {
+            String uri = this.getIntent().getDataString();
+            if (uri.split("=")[1] != null) {
+                session = uri.split("=")[1];
+                final JSONObject finalData = new JSONObject();
+                // Instantiate the RequestQueue.
+                RequestQueue requestQueue = Volley.newRequestQueue(this);
+                // Request a string response from the provided URL.
+                JsonObjectRequest jsonobj = new JsonObjectRequest(
+                        Request.Method.GET,
+                        "http://pitchlium-server.sockseed.com/getScript/" + session,
+                        finalData,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject res) {
+                                try {
+                                    script = res.getString("script");
+                                    scriptText.setText(script);
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.e("Error: ", error.toString());
+                            }
+                        }
+                );
+                requestQueue.add(jsonobj);
+            }
+        }
     }
 
     @Override
@@ -291,43 +336,45 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
-        if (status.equals("presenting")) {
-            for (DataEvent event : dataEvents) {
-                if (event.getType() == DataEvent.TYPE_CHANGED) {
-                    // DataItem changed
-                    DataItem item = event.getDataItem();
-                    if (item.getUri().getPath().compareTo(PATH) == 0) {
-                        DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
-                        try {
-                            final JSONObject data = new JSONObject(dataMap.getString("SensorData"));
-                            handMovements[0] = (float) data.getDouble("move1");
-                            handMovements[1] = (float) data.getDouble("move2");
-                            handMovements[2] = (float) data.getDouble("move3");
-                            handMovements[3] = (float) data.getDouble("move4");
-                            handMovements[4] = (float) data.getDouble("move5");
-                            heartrate.add((float) data.getDouble("heartrate"));
-                            steps = (float) data.getDouble("steps");
-                            light.add((float) data.getDouble("light"));
+        for (DataEvent event : dataEvents) {
+            if (event.getType() == DataEvent.TYPE_CHANGED) {
+                // DataItem changed
+                DataItem item = event.getDataItem();
+                if (item.getUri().getPath().compareTo(PATH) == 0 && status.equals("presenting")) {
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    try {
+                        final JSONObject data = new JSONObject(dataMap.getString("SensorData"));
+                        handMovements[0] = (float) data.getDouble("move1");
+                        handMovements[1] = (float) data.getDouble("move2");
+                        handMovements[2] = (float) data.getDouble("move3");
+                        handMovements[3] = (float) data.getDouble("move4");
+                        handMovements[4] = (float) data.getDouble("move5");
+                        heartrate.add((float) data.getDouble("heartrate"));
+                        steps = (float) data.getDouble("steps");
+                        light.add((float) data.getDouble("light"));
 
-                            tx.setText("X: " + data.getDouble("x") + " m/s^2");
-                            ty.setText("Y: " + data.getDouble("y") + " m/s^2");
-                            tz.setText("Z: " + data.getDouble("z") + " m/s^2");
-                            tTotalAccel.setText("" + data.getDouble("total") + " m/s^2");
-                            tTotalChange.setText("" + data.getDouble("diff") + "");
-                            tDetectMove.setText("" + data.getString("movement") + "");
-                            tgr1.setText("G1: " + data.getDouble("gr1") + " m/s^2");
-                            tgr2.setText("G2: " + data.getDouble("gr2") + " m/s^2");
-                            tgr3.setText("G3: " + data.getDouble("gr3") + " m/s^2");
-                            theartrate.setText("" + data.getDouble("heartrate") + " bpm");
-                            tsteps.setText("" + steps + " steps");
-                            tl.setText("" + data.getDouble("light") + " SI lux");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (item.getUri().getPath().compareTo(SCRIPT) == 0) {
-                        DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
-                        recordedScript = dataMap.getString("Script");
+                        tx.setText("X: " + data.getDouble("x") + " m/s^2");
+                        ty.setText("Y: " + data.getDouble("y") + " m/s^2");
+                        tz.setText("Z: " + data.getDouble("z") + " m/s^2");
+                        tTotalAccel.setText("" + data.getDouble("total") + " m/s^2");
+                        tTotalChange.setText("" + data.getDouble("diff") + "");
+                        tDetectMove.setText("" + data.getString("movement") + "");
+                        tgr1.setText("G1: " + data.getDouble("gr1") + " m/s^2");
+                        tgr2.setText("G2: " + data.getDouble("gr2") + " m/s^2");
+                        tgr3.setText("G3: " + data.getDouble("gr3") + " m/s^2");
+                        theartrate.setText("" + data.getDouble("heartrate") + " bpm");
+                        tsteps.setText("" + steps + " steps");
+                        tl.setText("" + data.getDouble("light") + " lux");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
+                } else if (item.getUri().getPath().compareTo(SCRIPT) == 0) {
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    Log.e("SCRIPT", dataMap.getString("Script"));
+                    recordedScript = dataMap.getString("Script");
+                    ready = true;
+                } else if (item.getUri().getPath().compareTo(WEAR_STATUS) == 0) {
+                    startPresentation();
                 }
             }
         }
@@ -340,6 +387,7 @@ public class MainActivity extends AppCompatActivity implements
         recordedScript = "";
         Arrays.fill(movements, 0);
         tStart = System.currentTimeMillis();
+        ready = false;
     }
 
     public void startPresentation() {
@@ -367,6 +415,7 @@ public class MainActivity extends AppCompatActivity implements
                     PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(STATUS);
                     // Map Sensor Data
                     putDataMapRequest.getDataMap().putString("Status", status);
+                    putDataMapRequest.getDataMap().putString("Script", script);
                     // Request Data Transfer
                     PutDataRequest request = putDataMapRequest.asPutDataRequest();
                     // Send Data
@@ -382,9 +431,21 @@ public class MainActivity extends AppCompatActivity implements
 
     public void stopPresentation() {
         status = "analyzing";
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!ready);
+                sendToServer();
+            }
+        }).start();
+    }
+
+    public void sendToServer() {
         final JSONObject finalData = new JSONObject();
         Gson gson = new Gson();
         try {
+            finalData.put("_id", session);
+            finalData.put("status", "finished");
             finalData.put("duration", (System.currentTimeMillis() - tStart) / 1000.0);
             finalData.put("movementPercentages", gson.toJson(calculateMovementPercentage(movements)));
             finalData.put("handMovementPercentages", gson.toJson(calculateMovementPercentage(handMovements)));
@@ -393,14 +454,18 @@ public class MainActivity extends AppCompatActivity implements
             finalData.put("temperatureCheck", gson.toJson(checkAverageThreshold(temperature, 20, 26)));
             finalData.put("humidityCheck", gson.toJson(checkAverageThreshold(humidity, 30, 60)));
             finalData.put("pressureCheck", gson.toJson(checkAverageThreshold(pressure, 990, 1020)));
-            finalData.put("script", recordedScript);
+            finalData.put("lightCheck", gson.toJson(checkAverageThreshold(light, 10, 1000)));
+            finalData.put("steps", (stepCount + steps) / 2);
+            finalData.put("recordedScript", recordedScript);
+            Log.e("SCRIPT: ", recordedScript);
+            Log.e("SENDING: ", finalData.toString());
             // Instantiate the RequestQueue.
-            RequestQueue requstQueue = Volley.newRequestQueue(this);
+            RequestQueue requestQueue = Volley.newRequestQueue(this);
 
             // Request a string response from the provided URL.
             JsonObjectRequest jsonobj = new JsonObjectRequest(
                     Request.Method.POST,
-                    "https://pitchlium.herokuapp.com/",
+                    "http://pitchlium-server.sockseed.com/",
                     finalData,
                     new Response.Listener<JSONObject>() {
                         @Override
@@ -415,7 +480,7 @@ public class MainActivity extends AppCompatActivity implements
                         }
                     }
             );
-            requstQueue.add(jsonobj);
+            requestQueue.add(jsonobj);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -455,11 +520,11 @@ public class MainActivity extends AppCompatActivity implements
     public String[] checkAverageThreshold(List<Float> list, float min, float max) {
         boolean valid = true;
         float sum = 0;
-        for (float item: list) {
+        for (float item: list)
             sum += item;
-            if (item < min || item > max)
-                valid = false;
-        }
+        float avg = (float) RoundTo2Decimals(((double) sum / (double) list.size()));
+        if (avg < min || avg > max)
+            valid = false;
         String[] results = new String[2];
         results[0] = (valid ? "true" : "false");
         results[1] = "" + RoundTo2Decimals(((double) sum / (double) list.size()));

@@ -11,7 +11,9 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -46,9 +48,10 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     private String status = "idle";
 
     // Set Data Paths for the Sensors
-    final private String PATH = "/sensors";
-    final private String STATUS = "/status";
-    final private String SCRIPT = "/script";
+    final String PATH = "/sensors";
+    final String STATUS = "/status";
+    final String WEAR_STATUS = "/wearStatus";
+    final String SCRIPT = "/script";
 
     // Sensor Data Global Variable
     float[] acceleration = new float[3], gravity = new float[3];
@@ -66,7 +69,8 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     Sensor lightS;
 
     // View Initialize
-    TextView hours, minutes, seconds, tStatus;
+    TextView hours, minutes, seconds;
+    Button startPresentationBtn;
 
     // Voice Recognition Initialize
     private SpeechRecognizer sr = null;
@@ -78,6 +82,9 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     final float THRESHOLD_SLOW_MOVEMENT = (float) 0.15;
     final float THRESHOLD_MODERATE_MOVEMENT = (float) 0.30;
     final float THRESHOLD_FAST_MOVEMENT = (float) 0.80;
+
+    // Script Text
+    String userScript = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +100,14 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         hours = (TextView) findViewById(R.id.hour);
         minutes = (TextView) findViewById(R.id.minute);
         seconds = (TextView) findViewById(R.id.second);
-        tStatus = (TextView) findViewById(R.id.status);
+//        tStatus = (TextView) findViewById(R.id.status);
+
+        startPresentationBtn = (Button) findViewById(R.id.toggleBtn);
+        startPresentationBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                changeStatus();
+            }
+        });
 
         // Setting Up Separate Sensors
         accelerometerS = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
@@ -145,6 +159,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                 if (item.getUri().getPath().compareTo(STATUS) == 0) {
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     status = dataMap.getString("Status");
+                    userScript = dataMap.getString("Script");
                     if (status.equals("presenting")) startPresenting(); else stopPresenting();
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
@@ -157,13 +172,14 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         tStart = System.currentTimeMillis();
         script = new StringBuilder();
         sr.startListening(speechIntent);
-        tStatus.setText("Presenting...");
     }
+
     public void stopPresenting() {
         sr.stopListening();
         sendScript();
-        tStatus.setText("Analyzing...");
     }
+
+    boolean dummyScripter = false;
     public void sendScript() {
         // Start a New Runnable
         new Thread(new Runnable() {
@@ -183,8 +199,8 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                     // Set Data Transfer Path
                     PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(SCRIPT);
                     // Map Sensor Data
-                    Log.e("Wear Script: ", script.toString());
-                    putDataMapRequest.getDataMap().putString("Script", script.toString());
+                    dummyScripter = !dummyScripter;
+                    putDataMapRequest.getDataMap().putString("Script", (script.toString().length() == 0 ? (dummyScripter ? "No Script" : "No Data") : script.toString()));
                     // Request Data Transfer
                     PutDataRequest request = putDataMapRequest.asPutDataRequest();
                     // Send Data
@@ -316,6 +332,42 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         }).start();
     }
 
+    // Send Sensor Data From Wearable to Phone
+    boolean dummyStatus = false;
+    private void changeStatus() {
+        // Start a New Runnable
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Check Node Connection
+                if (!nodeConnected) {
+                    mGoogleApiClient.blockingConnect(15000, TimeUnit.SECONDS);
+                }
+                // If Node not Connected
+                if (!nodeConnected) {
+                    Log.e("WEAR APP", "Failed to connect to mGoogleApiClient within " + 15000 + " seconds");
+                    return;
+                }
+                // If Everything is Connected
+                if (mGoogleApiClient.isConnected()) {
+                    // Set Data Transfer Path
+                    PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(WEAR_STATUS);
+                    // Map Sensor Data
+                    dummyStatus = !dummyStatus;
+                    putDataMapRequest.getDataMap().putString("Status", (dummyStatus ? "true" : "false"));
+                    // Request Data Transfer
+                    PutDataRequest request = putDataMapRequest.asPutDataRequest();
+                    // Send Data
+                    PendingResult<DataApi.DataItemResult> pendingResult =
+                            Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+
+                } else {
+                    Log.e("WEAR APP", "No Google API Client connection");
+                }
+            }
+        }).start();
+    }
+
     public void measureTimer() {
         double time = (System.currentTimeMillis() - tStart) / 1000.0;
         int hour = (int) time / 3600;
@@ -352,7 +404,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         @Override
         public void onResults(Bundle results) {
             ArrayList data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-            script.append(data.get(0));
+            script.append(data.get(0).toString());
             sr.startListening(speechIntent);
         }
         @Override

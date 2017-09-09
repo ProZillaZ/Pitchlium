@@ -12,19 +12,28 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center">
 
-        <TextView
-            android:id="@+id/status"
+        <Space
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/presenting"
+            android:layout_weight="0.4" />
+
+        <Button
+            android:id="@+id/toggleBtn"
+            android:layout_width="170dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:elevation="12dp"
+            android:text="Start Presenting"
             android:textAlignment="center"
-            android:textColor="@color/green"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="14sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2" />
 
         <LinearLayout
             android:layout_width="match_parent"
